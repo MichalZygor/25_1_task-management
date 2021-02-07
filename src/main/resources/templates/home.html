@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Zarządzanie zadaniami</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
+            crossorigin="anonymous"></script>
+
+</head>
+<body class="bg-light">
+
+<div class="container-fluid bg-white shadow-sm mt-3 mb-3 fs-4 text-center fw-bolder pt-3 pb-3" style="color: darkgreen">
+    <img th:src="@{src/task-list-2.png}" src="../static/src/task-list-2.png" class="mx-auto d-block" style="height: 60px"/>
+    <h2>Lista zadań</h2>
+</div>
+<div style="width: 100%; max-width: 1000px; margin: 0 100px auto">
+
+    <a class="btn btn-sm my-1" href="/"
+       th:classappend="${!#strings.containsIgnoreCase(filterList.forStatus() + filterList.forCategory()  + filterList.forUser(),'archived')} ? 'btn-warning' : 'btn-secondary'"
+    >Aktywne</a>
+    <a class="btn btn-sm my-1" href="/?archived=true"
+       th:classappend="${#strings.containsIgnoreCase(filterList.forStatus() + filterList.forCategory()  + filterList.forUser(),'archived')} ? 'btn-warning' : 'btn-secondary'"
+    >Archiwum</a>
+    <a class="btn btn-success btn-sm my-1" href="/add">Nowe zadanie</a>
+    <div class="mt-1">
+        <div>Wg statusu:</div>
+        <span>
+        <a class="btn btn-sm my-1" href="/"
+           th:classappend="${!#strings.containsIgnoreCase(filterList.forCategory() + filterList.forUser(),'status')} ? 'btn-primary' : 'btn-secondary'"
+           th:href="|/${!filterList.forStatus().isEmpty() ? '?' + filterList.forStatus() : ''}|">Wszystkie</a>&nbsp;
+        </span>
+        <span th:each="status : ${T(pl.javastart.taskmanagement.Status).values()}">
+        <a class="btn btn-sm my-1" href="/?status=HOME"
+           th:classappend="${#strings.containsIgnoreCase(filterList.forCategory() + filterList.forUser(),status.name())} ? 'btn-primary' : 'btn-secondary'"
+           th:href="|/?status=${status.name()}${!filterList.forStatus().isEmpty() ? '&' + filterList.forStatus() : ''}|" th:text="${status.displayName}">Sci-Fi</a>&nbsp;
+        </span>
+    </div>
+    <div class="mt-1">
+        <div>Wg kategorii:</div>
+        <span>
+        <a class="btn btn-sm my-1" href="/"
+           th:classappend="${!#strings.containsIgnoreCase(filterList.forStatus() + filterList.forUser(),'category')} ? 'btn-primary' : 'btn-secondary'"
+           th:href="|/${!filterList.forCategory().isEmpty() ? '?' + filterList.forCategory() : ''}|">Wszystkie</a>&nbsp;
+        </span>
+        <span th:each="category : ${T(pl.javastart.taskmanagement.Category).values()}">
+        <a class="btn btn-sm my-1" href="/?status=HOME"
+           th:classappend="${#strings.containsIgnoreCase(filterList.forStatus() + filterList.forUser(),category.name())} ? 'btn-primary' : 'btn-secondary'"
+           th:href="|/?category=${category.name()}${!filterList.forCategory().isEmpty() ? '&' + filterList.forCategory() : ''}|" th:text="${category.displayName}">Sci-Fi</a>&nbsp;
+        </span>
+    </div>
+    <div class="mt-1">
+        <div>Wg użytkownika:</div>
+        <span>
+        <a class="btn btn-sm my-1" href="/"
+           th:classappend="${!#strings.containsIgnoreCase(filterList.forStatus() + filterList.forCategory(),'user')} ? 'btn-primary' : 'btn-secondary'"
+           th:href="|/${!filterList.forUser().isEmpty() ? '?' + filterList.forUser() : ''}|">Wszystkie</a>&nbsp;
+        </span>
+        <span th:each="user : ${T(pl.javastart.taskmanagement.User).values()}">
+        <a class="btn btn-sm my-1" href="/?status=HOME"
+           th:classappend="${#strings.containsIgnoreCase(filterList.forStatus() + filterList.forCategory(),user.name())} ? 'btn-primary' : 'btn-secondary'"
+           th:href="|/?user=${user.name()}${!filterList.forUser().isEmpty() ? '&' + filterList.forUser() : ''}|" th:text="${user.displayName}">Sci-Fi</a>&nbsp;
+        </span>
+    </div>
+    <br />
+    <ul class="list-group">
+        <li class="list-group-item" th:each="task: ${taskList}">
+            <span class="text-primary fs-4" th:text="|${task.name}|"></span>
+            <span class="text-secondary" th:text="|Termin: ${task.dueDate}|"></span>
+            <span class="text-secondary" th:text="|Status: ${task.status.displayName}|"></span>
+            <a class="link-info" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false"
+               aria-controls="collapseExample" th:href="|#collapseTaskId${task.id}|">[opis]</a>
+            <a class="link-primary btn-sm" role="button"  data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+               href="#" th:data-bs-target="|#staticBackdrop${task.id}|">[zmień status]</a>
+            <a class="link-danger btn-sm" role="button"  href="#" th:href="|/edit/${task.id}|">[edycja]</a>
+            <div class="collapse" id="collapseExample" th:id="|collapseTaskId${task.id}|">
+                <div class=" card-body">
+                    Opis: <br /><span class="fw-bold" th:text="|${task.description}|"></span><br />
+                    Status: <span class="fw-bold" th:text="|${task.status.displayName}|"></span>
+                    Kategoria: <span class="fw-bold" th:text="|${task.category.displayName}|"></span>
+                    Użytkownik: <span class="fw-bold" th:text="|${task.user.displayName}|"></span> <br />
+                    Start: <span class="fw-bold" th:text="|${task.startDate}|"></span>
+                    Termin: <span class="fw-bold" th:text="|${task.dueDate}|"></span> <br />
+                    Id: <span class="fw-bold" th:text="|${task.id}|"></span>
+                    Data dodania: <span class="fw-bold" th:text="|${task.createdDate}|"></span>
+                </div>
+            </div>
+            <div class="modal fade" id="staticBackdrop" tabindex="-1" aria-labelledby="exampleModalLabel"
+                 aria-hidden="true" th:id="|staticBackdrop${task.id}|">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Wybierz nową kategorię</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form th:action="|/edit_status/${task.id}|" method="post" th:object="${task}">
+                            <div class="modal-body">
+                                <label for="status" class="form-label">Status</label>
+                                <select class="form-select" id="status" name="status">
+                                    <option th:each="status : ${T(pl.javastart.taskmanagement.Status).values()}"
+                                            th:value="${status}"
+                                            th:text="${status.displayName}"
+
+                                            th:selected="(${status} == ${task.status})">
+                                        status
+                                    </option>
+
+                                </select>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Save changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </li>
+    </ul>
+
+
+</div>
+
+<script type="text/javascript">
+    var exampleModal = document.getElementById('exampleModal')
+    exampleModal.addEventListener('show.bs.modal', function (event) {
+        // Button that triggered the modal
+        var button = event.relatedTarget
+        // Extract info from data-bs-* attributes
+        var recipient = button.getAttribute('data-bs-whatever')
+        // If necessary, you could initiate an AJAX request here
+        // and then do the updating in a callback.
+        //
+        // Update the modal's content.
+        var modalTitle = exampleModal.querySelector('.modal-title')
+        var modalBodyInput = exampleModal.querySelector('.modal-body input')
+
+        modalTitle.textContent = 'New message to ' + recipient
+        modalBodyInput.value = recipient
+    })
+
+</script>
+</body>
+</html>
