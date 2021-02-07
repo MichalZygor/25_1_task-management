@@ -70,6 +70,25 @@
             <input type="date" class="form-control" id="dueDate" th:field="*{dueDate}" required>
         </div>
 
+        <label for="status" class="form-label">Status</label>
+        <select class="form-select" id="status" name="status">
+            <option th:each="status : ${T(pl.javastart.taskmanagement.Status).values()}"
+                    th:value="${status}"
+                    th:text="${status.displayName}"
+                    th:selected="(${status} == ${task.status})">
+                status
+            </option>
+
+        </select>
+
+        <div class="mb-3">
+            <label for="archived" class="form-label">Do archiwum?</label>
+            <select class="form-select" id="archived" th:field="*{archived}">
+                <option value="true" th:selected="(*{archived.booleanValue()} == true)">tak</option>
+                <option value="false"th:selected="(*{archived.booleanValue()}  == false)">nie</option>
+            </select>
+        </div>
+
         <div class="mb-3">
             <button type="submit" class="btn btn-success mb-3">Zapisz</button>
             <a type="button" class="btn btn-secondary mb-3" th:href="|/|">Anulowanie i powrót do strony gównej</a>
