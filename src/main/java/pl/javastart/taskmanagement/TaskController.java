@@ -51,6 +51,7 @@ public class TaskController {
     @PostMapping("/add")
     public String addTask(Task task) {
         task.setCreatedDate(LocalDate.now());
+        task.setArchived(false);
         taskRepository.save(task);
         return "redirect:/";
     }
@@ -107,7 +108,7 @@ public class TaskController {
         } else if (user != null) {
             taskList = taskRepository.findAllByUser(user);
         } else {
-            taskList = taskRepository.findAll();
+            taskList = taskRepository.findAllByArchived(false);
         }
         return taskList;
     }
